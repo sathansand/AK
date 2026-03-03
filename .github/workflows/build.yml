@@ -3,7 +3,7 @@ name: Build Android APK
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:        # Allows manual triggering from the Actions tab
+  workflow_dispatch:
 
 jobs:
   build:
@@ -19,11 +19,25 @@ jobs:
           distribution: 'temurin'
           java-version: '8'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          cmdline-tools-version: 11076708
-          accept-android-sdk-licenses: true
+      - name: Create Android SDK directory
+        run: mkdir -p $HOME/android-sdk
+
+      - name: Download specific command-line tools (same as Colab)
+        run: |
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          unzip -q commandlinetools-linux-11076708_latest.zip -d $HOME/android-sdk
+          # Create the 'latest' subdirectory and move contents (as in Colab)
+          mkdir -p $HOME/android-sdk/cmdline-tools/latest
+          mv $HOME/android-sdk/cmdline-tools/* $HOME/android-sdk/cmdline-tools/latest/ 2>/dev/null || true
+
+      - name: Set environment variables
+        run: |
+          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "$HOME/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
+
+      - name: Accept all SDK licenses (non-interactive)
+        run: yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
 
       - name: Install required SDK components
         run: |
