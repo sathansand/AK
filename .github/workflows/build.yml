@@ -19,11 +19,11 @@ jobs:
           java-version: '17' # Match this to your project's Java version
           cache: 'gradle'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Make gradlew executable
+        run: chmod +x AndroidKeylogger/gradlew
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug
+        run: AndroidKeylogger/gradlew :app:assembleDebug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
